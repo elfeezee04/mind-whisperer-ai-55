@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Send, Heart } from 'lucide-react';
 import { Message } from './Message';
 import { TypingIndicator } from './TypingIndicator';
-import { generateAIResponse } from '@/lib/gemini';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface ChatMessage {
@@ -26,7 +26,6 @@ export const ChatBot = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [apiKey, setApiKey] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -41,15 +40,6 @@ export const ChatBot = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    if (!apiKey) {
-      toast({
-        title: "API Key Required",
-        description: "Please enter your Gemini API key above to start chatting.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content: inputValue.trim(),
@@ -62,11 +52,15 @@ export const ChatBot = () => {
     setIsTyping(true);
 
     try {
-      const aiResponse = await generateAIResponse(inputValue.trim(), apiKey);
+      const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
+        body: { message: inputValue.trim() }
+      });
+
+      if (error) throw error;
       
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: aiResponse,
+        content: data.response,
         sender: 'ai',
         timestamp: new Date(),
       };
@@ -76,7 +70,7 @@ export const ChatBot = () => {
       console.error('Error generating AI response:', error);
       toast({
         title: "Connection Error",
-        description: "I'm having trouble connecting right now. Please check your API key and try again.",
+        description: "I'm having trouble connecting right now. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -117,19 +111,6 @@ export const ChatBot = () => {
             </div>
           </div>
           
-          {/* API Key Input */}
-          <div className="mt-4">
-            <Input
-              type="password"
-              placeholder="Enter your Gemini API key to begin..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="bg-background/50"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Your API key stays in your browser and is never stored on our servers
-            </p>
-          </div>
         </div>
       </div>
 
