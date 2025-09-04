@@ -52,6 +52,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				'chat-bubble-user': 'hsl(var(--chat-bubble-user))',
+				'chat-bubble-user-foreground': 'hsl(var(--chat-bubble-user-foreground))',
+				'chat-bubble-ai': 'hsl(var(--chat-bubble-ai))',
+				'chat-bubble-ai-foreground': 'hsl(var(--chat-bubble-ai-foreground))',
+				'warm-accent': 'hsl(var(--warm-accent))',
+				'typing-dots': 'hsl(var(--typing-dots))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -62,6 +68,12 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			backgroundImage: {
+				'calm-gradient': 'var(--calm-gradient)',
+			},
+			boxShadow: {
+				'gentle': 'var(--gentle-shadow)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +96,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					from: {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					to: {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'typing': {
+					'0%, 60%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'30%': {
+						transform: 'translateY(-8px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'typing': 'typing 1.4s infinite'
 			}
 		}
 	},
