@@ -47,13 +47,10 @@ export default function Auth() {
         });
         navigate('/');
       } else {
-        const redirectUrl = `${window.location.origin}/`;
-        
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: redirectUrl,
             data: {
               full_name: fullName,
             }
@@ -62,10 +59,19 @@ export default function Auth() {
         
         if (error) throw error;
         
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
+        // Check if user was created and automatically confirmed
+        if (data.user && data.session) {
+          toast({
+            title: "Welcome to MindfulChat!",
+            description: "Your account has been created successfully.",
+          });
+          navigate('/');
+        } else {
+          toast({
+            title: "Account created!",
+            description: "Please check your email to verify your account.",
+          });
+        }
       }
     } catch (error: any) {
       toast({
