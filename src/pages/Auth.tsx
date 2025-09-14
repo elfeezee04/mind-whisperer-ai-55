@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Heart, Mail, Lock, User } from 'lucide-react';
+import { Heart, Mail, Lock, User, Calendar, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,8 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -53,6 +55,8 @@ export default function Auth() {
           options: {
             data: {
               full_name: fullName,
+              age: parseInt(age),
+              gender: gender,
             }
           }
         });
@@ -65,7 +69,7 @@ export default function Auth() {
             title: "Welcome to MindfulChat!",
             description: "Your account has been created successfully.",
           });
-          navigate('/');
+          navigate('/goals-selection');
         } else {
           toast({
             title: "Account created!",
@@ -123,6 +127,50 @@ export default function Auth() {
                   className="bg-background/50"
                 />
               </div>
+            )}
+
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="age" className="text-sm font-medium">
+                    <Calendar className="h-4 w-4 inline mr-2" />
+                    Age
+                  </Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="Enter your age"
+                    required={!isLogin}
+                    disabled={loading}
+                    min="13"
+                    max="120"
+                    className="bg-background/50"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="gender" className="text-sm font-medium">
+                    <Users className="h-4 w-4 inline mr-2" />
+                    Gender
+                  </Label>
+                  <select
+                    id="gender"
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    required={!isLogin}
+                    disabled={loading}
+                    className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                  </select>
+                </div>
+              </>
             )}
             
             <div className="space-y-2">

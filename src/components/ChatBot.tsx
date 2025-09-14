@@ -71,7 +71,10 @@ export const ChatBot = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
-        body: { message: inputValue.trim() }
+        body: { 
+          message: inputValue.trim(),
+          userId: user?.id 
+        }
       });
 
       if (error) throw error;

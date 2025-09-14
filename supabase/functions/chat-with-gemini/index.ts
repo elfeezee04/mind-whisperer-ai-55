@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,20 +16,58 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const { message, userId } = await req.json();
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!geminiApiKey) {
       throw new Error('Gemini API key not configured');
     }
 
-    const systemPrompt = `You are a compassionate mental health support chatbot. Your role is to:
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Supabase configuration missing');
+    }
+
+    // Initialize Supabase client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch user's mental health goals
+    let userGoals = [];
+    if (userId) {
+      const { data: goalsData } = await supabase
+        .from('user_goals')
+        .select(`
+          mental_health_goals (
+            name,
+            description
+          )
+        `)
+        .eq('user_id', userId);
+      
+      userGoals = goalsData?.map(g => g.mental_health_goals) || [];
+    }
+
+    // Create personalized system prompt
+    let personalizedPrompt = `You are a compassionate mental health support chatbot. Your role is to:
     
     1. Provide emotional support and validation
     2. Listen empathetically without judgment
     3. Offer gentle guidance and coping strategies
     4. Encourage professional help when appropriate
-    5. Maintain a warm, caring tone
+    5. Maintain a warm, caring tone`;
+
+    if (userGoals.length > 0) {
+      const goalsText = userGoals.map(goal => `- ${goal.name}: ${goal.description}`).join('\n');
+      personalizedPrompt += `
+      
+    The user has selected these mental health goals to work on:
+    ${goalsText}
+    
+    Please tailor your responses to help them with these specific goals, offering relevant advice and encouragement related to their chosen areas of focus.`;
+    }
+
+    personalizedPrompt += `
     
     Important guidelines:
     - Never provide medical advice or diagnosis
@@ -52,7 +91,7 @@ serve(async (req) => {
           {
             parts: [
               {
-                text: `${systemPrompt}\n\nUser message: ${message}`
+                text: `${personalizedPrompt}\n\nUser message: ${message}`
               }
             ]
           }
