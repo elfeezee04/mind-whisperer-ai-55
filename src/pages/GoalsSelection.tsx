@@ -14,7 +14,7 @@ interface Goal {
   icon_name: string;
 }
 
-const iconMap: { [key: string]: any } = {
+const iconMap: Record<string, React.ComponentType<any>> = {
   heart: Heart,
   users: Users,
   target: Target,
@@ -76,7 +76,7 @@ export default function GoalsSelection() {
   const handleContinue = async () => {
     if (selectedGoals.length !== 3) {
       toast({
-        title: "Please select 3 goals",
+        title: "Please select exactly 3 goals",
         description: "You need to select exactly 3 goals to continue.",
         variant: "destructive",
       });
