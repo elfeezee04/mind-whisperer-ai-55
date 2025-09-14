@@ -85,6 +85,30 @@ export type Database = {
         }
         Relationships: []
       }
+      mental_health_goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon_name: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           content: Json | null
@@ -131,28 +155,34 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
           avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
+          gender: string | null
           id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          age?: number | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          age?: number | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           updated_at?: string
           user_id?: string
@@ -196,6 +226,35 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_goals: {
+        Row: {
+          goal_id: string
+          id: string
+          selected_at: string
+          user_id: string
+        }
+        Insert: {
+          goal_id: string
+          id?: string
+          selected_at?: string
+          user_id: string
+        }
+        Update: {
+          goal_id?: string
+          id?: string
+          selected_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_goals_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "mental_health_goals"
             referencedColumns: ["id"]
           },
         ]
