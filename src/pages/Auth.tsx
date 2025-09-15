@@ -3,17 +3,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Heart, Mail, Lock, User, Calendar, Users } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Heart, Mail, Lock, User, Calendar as CalendarIcon, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [age, setAge] = useState('');
+  const [birthDate, setBirthDate] = useState<Date | undefined>(undefined);
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -49,13 +53,16 @@ export default function Auth() {
         });
         navigate('/');
       } else {
+        // Calculate age from birth date
+        const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : 0;
+        
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
               full_name: fullName,
-              age: parseInt(age),
+              age: age,
               gender: gender,
             }
           }
@@ -132,22 +139,37 @@ export default function Auth() {
             {!isLogin && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="age" className="text-sm font-medium">
-                    <Calendar className="h-4 w-4 inline mr-2" />
-                    Age
+                  <Label className="text-sm font-medium">
+                    <CalendarIcon className="h-4 w-4 inline mr-2" />
+                    Date of Birth
                   </Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    placeholder="Enter your age"
-                    required={!isLogin}
-                    disabled={loading}
-                    min="13"
-                    max="120"
-                    className="bg-background/50"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal bg-background/50",
+                          !birthDate && "text-muted-foreground"
+                        )}
+                        disabled={loading}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {birthDate ? format(birthDate, "PPP") : "Pick your birth date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={birthDate}
+                        onSelect={setBirthDate}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 
                 <div className="space-y-2">
