@@ -25,107 +25,91 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   sun: Sun,
 };
 
+const fallbackGoals: Goal[] = [
+  { id: 'calm', name: 'Feel calm', description: null, icon_name: 'smile' },
+  { id: 'relationships', name: 'Improve relationships', description: null, icon_name: 'users' },
+  { id: 'productive', name: 'Be more productive', description: null, icon_name: 'target' },
+  { id: 'sadness', name: 'Overcome sadness', description: null, icon_name: 'heart' },
+  { id: 'balanced', name: 'Feel more balanced', description: null, icon_name: 'scale' },
+  { id: 'shyness', name: 'Overcome shyness', description: null, icon_name: 'userCheck' },
+];
+
 const Index = () => {
-  const [hasGoals, setHasGoals] = useState<boolean | null>(null);
+  const [hasGoals, setHasGoals] = useState<boolean>(false);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fallbackMode, setFallbackMode] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkUserGoals = async () => {
-      if (!user) return;
-      
+    const fetchGoals = async () => {
       try {
-        const { data: userGoals, error: userGoalsError } = await supabase
-          .from('user_goals')
-          .select('id')
-          .eq('user_id', user.id)
-          .limit(1);
+        const { data: availableGoals, error } = await supabase
+          .from('mental_health_goals')
+          .select('*')
+          .order('id');
 
-        if (userGoalsError) throw userGoalsError;
-        
-        if (!userGoals || userGoals.length === 0) {
-          // Fetch available goals for selection
-          const { data: availableGoals, error: goalsError } = await supabase
-            .from('mental_health_goals')
-            .select('*')
-            .order('id');
-          
-          if (goalsError) throw goalsError;
-          
-          setGoals(availableGoals || []);
-          setHasGoals(false);
+        if (error) throw error;
+
+        if (!availableGoals || availableGoals.length === 0) {
+          setGoals(fallbackGoals);
+          setFallbackMode(true);
         } else {
-          setHasGoals(true);
+          setGoals(availableGoals as Goal[]);
+          setFallbackMode(false);
         }
-      } catch (error) {
-        console.error('Error checking user goals:', error);
-        setHasGoals(false);
+      } catch (err) {
+        console.error('Error loading goals:', err);
+        setGoals(fallbackGoals);
+        setFallbackMode(true);
+      } finally {
+        setInitialLoading(false);
       }
     };
 
-    checkUserGoals();
-  }, [user]);
+    fetchGoals();
+  }, []);
 
   const handleGoalToggle = (goalId: string) => {
-    setSelectedGoals(prev => {
-      if (prev.includes(goalId)) {
-        return prev.filter(id => id !== goalId);
-      } else if (prev.length < 3) {
-        return [...prev, goalId];
-      }
-      return prev;
-    });
+    setSelectedGoals(prev =>
+      prev.includes(goalId) ? prev.filter(id => id !== goalId) : [...prev, goalId]
+    );
   };
 
   const handleContinue = async () => {
-    if (selectedGoals.length !== 3) {
+    if (selectedGoals.length < 1) {
       toast({
-        title: "Please select exactly 3 goals",
-        description: "You need to select exactly 3 goals to continue.",
-        variant: "destructive",
+        title: 'Select at least 1 goal',
+        description: 'Please select at least one goal to continue.',
+        variant: 'destructive',
       });
       return;
     }
 
-    if (!user) return;
-
     setLoading(true);
 
     try {
-      const userGoals = selectedGoals.map(goalId => ({
-        user_id: user.id,
-        goal_id: goalId,
-      }));
-
-      const { error } = await supabase
-        .from('user_goals')
-        .insert(userGoals);
-
-      if (error) throw error;
-
-      toast({
-        title: "Goals selected successfully!",
-        description: "You can now start chatting with your personalized AI assistant.",
-      });
+      if (!fallbackMode && user) {
+        const rows = selectedGoals.map(goalId => ({ user_id: user.id, goal_id: goalId }));
+        const { error } = await supabase.from('user_goals').insert(rows, { defaultToNull: true });
+        if (error) throw error;
+      }
 
       setHasGoals(true);
     } catch (error) {
       console.error('Error saving goals:', error);
-      toast({
-        title: "Error saving goals",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      toast({ title: 'Could not save goals', description: 'Proceeding without saving.', variant: 'destructive' });
+      setHasGoals(true);
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading while checking goals
-  if (hasGoals === null) {
+  // Show loading while fetching goals
+  if (initialLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-purple-600 via-purple-500 to-purple-700">
         <div className="text-center">
@@ -146,7 +130,7 @@ const Index = () => {
               What brings you here?
             </h1>
             <p className="text-lg text-purple-100">
-              We'll personalize your experience based on your top 3 goals.
+              We'll personalize your experience based on your goals.
             </p>
           </div>
 
@@ -169,12 +153,14 @@ const Index = () => {
                     {IconComponent && (
                       <IconComponent className="h-8 w-8 mx-auto mb-3 text-white" />
                     )}
-                    <h3 className="text-lg font-semibold text-white mb-2">
+                    <h3 className="text-xl font-bold text-white drop-shadow-md">
                       {goal.name}
                     </h3>
-                    <p className="text-sm text-purple-100">
-                      {goal.description}
-                    </p>
+                    {goal.description && (
+                      <p className="text-sm text-purple-100 mt-1">
+                        {goal.description}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -184,11 +170,11 @@ const Index = () => {
           <div className="text-center">
             <Button 
               onClick={handleContinue}
-              disabled={selectedGoals.length !== 3 || loading}
+              disabled={selectedGoals.length < 1 || loading}
               className="px-8 py-3 bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 disabled:opacity-50"
               size="lg"
             >
-              {loading ? 'Saving...' : `Select 3 goals to continue (${selectedGoals.length}/3)`}
+              {loading ? 'Saving...' : (selectedGoals.length < 1 ? 'Select at least 1 goal to continue' : `Continue (${selectedGoals.length} selected)`)}
             </Button>
           </div>
         </div>
