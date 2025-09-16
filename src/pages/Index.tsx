@@ -26,12 +26,12 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 };
 
 const fallbackGoals: Goal[] = [
-  { id: 'calm', name: 'Feel calm', description: null, icon_name: 'smile' },
-  { id: 'relationships', name: 'Improve relationships', description: null, icon_name: 'users' },
-  { id: 'productive', name: 'Be more productive', description: null, icon_name: 'target' },
-  { id: 'sadness', name: 'Overcome sadness', description: null, icon_name: 'heart' },
-  { id: 'balanced', name: 'Feel more balanced', description: null, icon_name: 'scale' },
-  { id: 'shyness', name: 'Overcome shyness', description: null, icon_name: 'userCheck' },
+  { id: 'mental-health', name: 'Mental Health', description: 'Focus on overall mental wellness', icon_name: 'brain' },
+  { id: 'anxiety', name: 'Anxiety', description: 'Manage anxiety and worry', icon_name: 'heart' },
+  { id: 'stress', name: 'Stress', description: 'Find balance and reduce stress', icon_name: 'scale' },
+  { id: 'depression', name: 'Depression', description: 'Overcome depression and find hope', icon_name: 'sun' },
+  { id: 'sadness', name: 'Sadness', description: 'Work through sadness and find joy', icon_name: 'smile' },
+  { id: 'low-self-esteem', name: 'Low self esteem', description: 'Build confidence and self-worth', icon_name: 'userCheck' },
 ];
 
 const Index = () => {
