@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Heart, Mail, Lock, User, Calendar as CalendarIcon, Users } from 'lucide-react';
+import kadpolyLogo from '@/assets/kadpoly-logo.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -96,16 +97,17 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-calm-gradient flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-card/80 backdrop-blur-sm border-border/50">
+    <div className="min-h-screen bg-calm-gradient flex items-center justify-center p-4 relative">
+      <div className="absolute inset-0 flex items-center justify-center opacity-10">
+        <img src={kadpolyLogo} alt="Kaduna Polytechnic" className="w-96 h-96 object-contain" />
+      </div>
+      <Card className="w-full max-w-md bg-card/80 backdrop-blur-sm border-border/50 relative z-10">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Heart className="h-8 w-8 text-primary" />
-            </div>
+            <img src={kadpolyLogo} alt="Kaduna Polytechnic" className="h-20 w-20 object-contain" />
           </div>
           <CardTitle className="text-2xl font-semibold text-foreground">
-            {isLogin ? 'Welcome Back' : 'Join MindfulChat'}
+            Kaduna Polytechnic Group 8
           </CardTitle>
           <CardDescription className="text-muted-foreground">
             {isLogin 

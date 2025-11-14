@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Send, Heart, LogOut, User } from 'lucide-react';
+import { Send, Heart, LogOut, User, ArrowLeft } from 'lucide-react';
+import kadpolyLogo from '@/assets/kadpoly-logo.jpg';
 import { Message } from './Message';
 import { TypingIndicator } from './TypingIndicator';
 import { supabase } from '@/integrations/supabase/client';
@@ -124,12 +125,18 @@ export const ChatBot = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Heart className="h-5 w-5 text-primary" />
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => window.history.back()}
+                className="hover:bg-primary/10"
+              >
+                <ArrowLeft className="h-5 w-5 text-primary" />
+              </Button>
+              <img src={kadpolyLogo} alt="Kaduna Polytechnic" className="h-10 w-10 object-contain rounded-full" />
               <div>
-                <h1 className="text-xl font-semibold text-foreground">MindfulChat</h1>
-                <p className="text-sm text-muted-foreground">Your compassionate AI companion</p>
+                <h1 className="text-xl font-semibold text-foreground">Kaduna Polytechnic</h1>
+                <p className="text-sm text-muted-foreground">Computer Science Group 8</p>
               </div>
             </div>
             
